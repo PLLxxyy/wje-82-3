@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { transformTicket, transformTicketMessage } from '../utils';
+import { transformTicket, transformTicketMessage, getTicketStatusLabel, getTicketStatusBadgeClass, canMarkAsSold, canConfirmTicket } from '../utils';
 import '../styles.css';
 
 function TicketDetail({ user }) {
@@ -142,8 +142,8 @@ function TicketDetail({ user }) {
                 <div className="ticket-original-price">¥{ticket.originalPrice}</div>
               </div>
               <div style={{ marginLeft: 'auto' }}>
-                <span className={`status-badge ${ticket.status === 'available' ? 'status-available' : 'status-sold'}`}>
-                  {ticket.status === 'available' ? '可转让' : '已转让'}
+                <span className={getTicketStatusBadgeClass(ticket.status)}>
+                  {getTicketStatusLabel(ticket.status)}
                 </span>
               </div>
             </div>
@@ -172,7 +172,7 @@ function TicketDetail({ user }) {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 {isOwner ? (
-                  ticket.status === 'available' && (
+                  canMarkAsSold(ticket.status, isOwner) && (
                     <button
                       className="btn btn-success"
                       onClick={handleMarkSold}
@@ -182,7 +182,7 @@ function TicketDetail({ user }) {
                     </button>
                   )
                 ) : (
-                  ticket.status === 'available' && (
+                  canConfirmTicket(ticket.status, isOwner) && (
                     <button
                       className="btn btn-success"
                       onClick={handleConfirm}

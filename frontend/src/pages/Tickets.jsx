@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { transformTicket } from '../utils';
+import { transformTicket, getTicketStatusLabel, getTicketStatusBadgeClass } from '../utils';
 import '../styles.css';
 
 function Tickets({ user }) {
@@ -146,8 +146,8 @@ function Tickets({ user }) {
                       </div>
                       <span style={{ fontSize: '13px', color: '#666' }}>{ticket.seller?.nickname}</span>
                     </div>
-                    <span className={`status-badge ${ticket.status === 'available' ? 'status-available' : 'status-sold'}`}>
-                      {ticket.status === 'available' ? '可转让' : '已转让'}
+                    <span className={getTicketStatusBadgeClass(ticket.status)}>
+                      {getTicketStatusLabel(ticket.status)}
                     </span>
                   </div>
                 </div>

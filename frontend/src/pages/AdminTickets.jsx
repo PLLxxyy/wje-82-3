@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api.js';
 import AdminSidebar from '../components/AdminSidebar.jsx';
-
-const statusTabs = [
-  { key: 'available', label: '在售' },
-  { key: 'sold', label: '已售' },
-  { key: 'removed', label: '已移除' },
-];
+import { adminTicketStatusTabs, getTicketStatusLabel, getTicketStatusBadgeClass, TicketStatus } from '../utils';
 
 function AdminTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('available');
+  const [status, setStatus] = useState(TicketStatus.AVAILABLE);
   const [removeModal, setRemoveModal] = useState({ visible: false, ticketId: null });
   const [removeReason, setRemoveReason] = useState('');
 
@@ -52,13 +47,7 @@ function AdminTickets() {
   };
 
   const getStatusBadge = (s) => {
-    const statusMap = {
-      available: { text: '在售' },
-      sold: { text: '已售' },
-      removed: { text: '已移除' },
-    };
-    const info = statusMap[s] || statusMap.available;
-    return <span className={`status-badge status-${s}`}>{info.text}</span>;
+    return <span className={getTicketStatusBadgeClass(s)}>{getTicketStatusLabel(s, true)}</span>;
   };
 
   return (
@@ -68,7 +57,7 @@ function AdminTickets() {
         <h2 style={{ marginBottom: '20px' }}>🎫 票务管理</h2>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          {statusTabs.map((tab) => (
+          {adminTicketStatusTabs.map((tab) => (
             <button
               key={tab.key}
               className={`btn ${status === tab.key ? 'btn-primary' : 'btn-secondary'}`}
@@ -84,7 +73,7 @@ function AdminTickets() {
         ) : tickets.length === 0 ? (
           <div className="empty-state">
             <div style={{ fontSize: '64px', marginBottom: '20px', opacity: 0.5 }}>🎫</div>
-            <p>暂无{statusTabs.find((t) => t.key === status)?.label}的票务</p>
+            <p>暂无{adminTicketStatusTabs.find((t) => t.key === status)?.label}的票务</p>
           </div>
         ) : (
           <div className="admin-table">
@@ -129,7 +118,7 @@ function AdminTickets() {
                     <td>{new Date(ticket.created_at).toLocaleString('zh-CN')}</td>
                     <td>{getStatusBadge(ticket.status)}</td>
                     <td>
-                      {status === 'available' && (
+                      {status === TicketStatus.AVAILABLE && (
                         <div className="admin-actions">
                           <button
                             className="btn btn-danger btn-sm"
@@ -139,7 +128,7 @@ function AdminTickets() {
                           </button>
                         </div>
                       )}
-                      {ticket.remove_reason && status === 'removed' && (
+                      {ticket.remove_reason && status === TicketStatus.REMOVED && (
                         <div style={{ fontSize: '12px', color: '#888' }}>
                           原因：{ticket.remove_reason}
                         </div>

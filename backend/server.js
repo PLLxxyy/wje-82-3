@@ -12,6 +12,18 @@ const PORT = 3001;
 const JWT_SECRET = 'concert-fan-secret-key-2024';
 const dbPath = path.join(__dirname, 'concert-fan.db');
 
+const TicketStatus = {
+  AVAILABLE: 'available',
+  SOLD: 'sold',
+  REMOVED: 'removed'
+};
+
+const VALID_TICKET_STATUSES = Object.values(TicketStatus);
+
+function isValidTicketStatus(status) {
+  return VALID_TICKET_STATUSES.includes(status);
+}
+
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -501,7 +513,7 @@ app.get('/api/tickets', (req, res) => {
       FROM tickets t JOIN users u ON t.user_id = u.id
       JOIN concerts c ON t.concert_id = c.id
       JOIN artists a ON c.artist_id = a.id
-      WHERE t.status = 'available'
+      WHERE t.status = '${TicketStatus.AVAILABLE}'
     `;
     const params = [];
     if (artist) { sql += ' AND a.name = ?'; params.push(artist); }
@@ -509,8 +521,8 @@ app.get('/api/tickets', (req, res) => {
     sql += ' ORDER BY t.created_at DESC';
     const tickets = dbAll(sql, params);
     
-    const artists = dbAll('SELECT DISTINCT a.name FROM tickets t JOIN concerts c ON t.concert_id = c.id JOIN artists a ON c.artist_id = a.id WHERE t.status = ? ORDER BY a.name', ['available']).map(a => a.name);
-    const cities = dbAll('SELECT DISTINCT c.city FROM tickets t JOIN concerts c ON t.concert_id = c.id WHERE t.status = ? ORDER BY c.city', ['available']).map(c => c.city);
+    const artists = dbAll('SELECT DISTINCT a.name FROM tickets t JOIN concerts c ON t.concert_id = c.id JOIN artists a ON c.artist_id = a.id WHERE t.status = ? ORDER BY a.name', [TicketStatus.AVAILABLE]).map(a => a.name);
+    const cities = dbAll('SELECT DISTINCT c.city FROM tickets t JOIN concerts c ON t.concert_id = c.id WHERE t.status = ? ORDER BY c.city', [TicketStatus.AVAILABLE]).map(c => c.city);
     
     res.json({ tickets, artists, cities });
   } catch (e) {
@@ -584,7 +596,7 @@ app.post('/api/tickets/:id/mark-sold', authenticate, (req, res) => {
     if (!ticket || ticket.user_id !== userId) {
       return res.status(403).json({ error: '无权操作此票务' });
     }
-    dbRun('UPDATE tickets SET status = ? WHERE id = ?', ['sold', ticketId]);
+    dbRun('UPDATE tickets SET status = ? WHERE id = ?', [TicketStatus.SOLD, ticketId]);
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -686,7 +698,10 @@ app.post('/api/admin/posts/:id/reject', adminAuthenticate, (req, res) => {
 
 app.get('/api/admin/tickets', adminAuthenticate, (req, res) => {
   try {
-    const { status = 'available', page = 1, limit = 20 } = req.query;
+    const { status = TicketStatus.AVAILABLE, page = 1, limit = 20 } = req.query;
+    if (!isValidTicketStatus(status)) {
+      return res.status(400).json({ error: '无效的票务状态' });
+    }
     const offset = (page - 1) * limit;
     const tickets = dbAll(`
       SELECT t.*, u.nickname as seller_nickname, c.title as concert_title
@@ -704,7 +719,7 @@ app.post('/api/admin/tickets/:id/remove', adminAuthenticate, (req, res) => {
   try {
     const ticketId = req.params.id;
     const { reason } = req.body;
-    dbRun('UPDATE tickets SET status = ? WHERE id = ?', ['removed', ticketId]);
+    dbRun('UPDATE tickets SET status = ? WHERE id = ?', [TicketStatus.REMOVED, ticketId]);
     dbRun(
       'INSERT INTO audit_logs (admin_id, target_type, target_id, action, reason) VALUES (?, ?, ?, ?, ?)',
       [req.admin.id, 'ticket', ticketId, 'remove', reason]
