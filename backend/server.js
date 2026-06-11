@@ -12,17 +12,10 @@ const PORT = 3001;
 const JWT_SECRET = 'concert-fan-secret-key-2024';
 const dbPath = path.join(__dirname, 'concert-fan.db');
 
-const TicketStatus = {
-  AVAILABLE: 'available',
-  SOLD: 'sold',
-  REMOVED: 'removed'
-};
-
-const VALID_TICKET_STATUSES = Object.values(TicketStatus);
-
-function isValidTicketStatus(status) {
-  return VALID_TICKET_STATUSES.includes(status);
-}
+const {
+  TicketStatus,
+  isValidTicketStatus
+} = require('../shared/ticket-status.js');
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));

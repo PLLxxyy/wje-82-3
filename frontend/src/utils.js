@@ -134,55 +134,14 @@ export function formatConcertDate(dateString) {
   };
 }
 
-export const TicketStatus = {
-  AVAILABLE: 'available',
-  SOLD: 'sold',
-  REMOVED: 'removed'
-};
-
-const statusLabelMap = {
-  [TicketStatus.AVAILABLE]: '可转让',
-  [TicketStatus.SOLD]: '已转让',
-  [TicketStatus.REMOVED]: '已移除'
-};
-
-const adminStatusLabelMap = {
-  [TicketStatus.AVAILABLE]: '在售',
-  [TicketStatus.SOLD]: '已售',
-  [TicketStatus.REMOVED]: '已移除'
-};
-
-export function getTicketStatusLabel(status, isAdmin = false) {
-  const map = isAdmin ? adminStatusLabelMap : statusLabelMap;
-  return map[status] || statusLabelMap[TicketStatus.AVAILABLE];
-}
-
-export function isTicketAvailable(status) {
-  return status === TicketStatus.AVAILABLE;
-}
-
-export function isTicketSold(status) {
-  return status === TicketStatus.SOLD;
-}
-
-export function isTicketRemoved(status) {
-  return status === TicketStatus.REMOVED;
-}
-
-export function canMarkAsSold(status, isOwner) {
-  return isOwner && status === TicketStatus.AVAILABLE;
-}
-
-export function canConfirmTicket(status, isOwner) {
-  return !isOwner && status === TicketStatus.AVAILABLE;
-}
-
-export function getTicketStatusBadgeClass(status) {
-  return `status-badge status-${status}`;
-}
-
-export const adminTicketStatusTabs = [
-  { key: TicketStatus.AVAILABLE, label: '在售' },
-  { key: TicketStatus.SOLD, label: '已售' },
-  { key: TicketStatus.REMOVED, label: '已移除' }
-];
+export {
+  TicketStatus,
+  getTicketStatusLabel,
+  isTicketAvailable,
+  isTicketSold,
+  isTicketRemoved,
+  canMarkAsSold,
+  canConfirmTicket,
+  getTicketStatusBadgeClass,
+  adminTicketStatusTabs
+} from '../../shared/ticket-status.js';
