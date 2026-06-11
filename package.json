@@ -1,0 +1,17 @@
+{
+  "name": "concert-fan-platform",
+  "version": "1.0.0",
+  "description": "演唱会粉丝社交平台 - 全栈项目",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "init-db": "cd backend && npm run init-db",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "setup": "npm run install:all && npm run init-db"
+  },
+  "keywords": ["concert", "fan", "social", "platform"],
+  "author": "",
+  "license": "MIT"
+}
